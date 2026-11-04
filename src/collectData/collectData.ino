@@ -18,17 +18,28 @@
   This example code is in the public domain. 
 */ 
 
+/*
+  From here on, the code has been modified completely by Gabriel Wojcik, GW803
+*/
+
+#include <TimerOne.h>
+
+void Timer1_ISR(void)
+{
+  int value = analogRead(A0);
+  Serial.println(value);
+}
+
 void setup()  
 {
-  Serial.begin(115200); 
+  Serial.begin(250000); 
   while (!Serial); // optionally wait for serial terminal to open 
-  Serial.println("MyoWare Example_01_analogRead_SINGLE"); 
   pinMode(A0, INPUT);
+
+  Timer1.initialize(100);   // 10khz sampling rate
+  Timer1.attachInterrupt(Timer1_ISR);
 } 
 
 void loop()  
-{   
-  int sensorValue = analogRead(A0); // read the input on analog pin A0 
-  Serial.println(sensorValue); // print out the value you read 
-  delay(50); // to avoid overloading the serial terminal 
+{
 } 
