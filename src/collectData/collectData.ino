@@ -1,45 +1,43 @@
-/* 
-  MyoWare Example_01_analogRead_SINGLE 
-  SparkFun Electronics 
-  Pete Lewis 
-  3/24/2022 
-  License: This code is public domain but you buy me a beverage if you use this and we meet someday. 
-  This code was adapted from the MyoWare analogReadValue.ino example found here: 
-  https://github.com/AdvancerTechnologies/MyoWare_MuscleSensor 
-  This example streams the data from a single MyoWare sensor attached to ADC A0. 
-  Graphical representation is available using Serial Plotter (Tools > Serial Plotter menu). 
-  
-  *Only run on a laptop using its battery. Do not plug in laptop charger/dock/monitor. 
-  *Do not touch your laptop trackpad or keyboard while the MyoWare sensor is powered. 
-  Hardware: 
-  SparkFun RedBoard Artemis (or Arduino of choice) 
-  USB from Artemis to Computer. 
-  Output from sensor connected to your Arduino pin A0 
-  This example code is in the public domain. 
-*/ 
+#include <ESP32TimerInterrupt.h>
 
-/*
-  From here on, the code has been modified completely by Gabriel Wojcik, GW803
-*/
+ESP32Timer ITimer0(0);
 
-#include <TimerOne.h>
+bool dataReady = false;
+uint64_t interruptCount = 0;
+uint64_t skippedCount = 0;
+int dataLogged = 0;
 
-void Timer1_ISR(void)
+bool IRAM_ATTR TimerHandler0(void * timerNo)
 {
-  int value = analogRead(A0);
-  Serial.println(value);
+	if (dataReady == true){
+		skippedCount++;
+	}
+	dataLogged = analogRead(4);
+	dataReady = true;
+	interruptCount++;
+	return true;
 }
 
-void setup()  
+void setup()
 {
-  Serial.begin(250000); 
-  while (!Serial); // optionally wait for serial terminal to open 
-  pinMode(A0, INPUT);
+    Serial.begin(2000000);
+    pinMode(4, INPUT);
 
-  Timer1.initialize(100);   // 10khz sampling rate
-  Timer1.attachInterrupt(Timer1_ISR);
-} 
+    if (ITimer0.attachInterruptInterval(200, TimerHandler0))
+		{
+			Serial.print(F("Starting  ITimer0 OK, millis() = "));
+			Serial.println(millis());
+		}
+		else
+			Serial.println(F("Can't set ITimer0. Select another freq. or timer"));
 
-void loop()  
+    Serial.flush();
+}
+void loop()
 {
-} 
+    // Do Nothing!
+	if (dataReady){
+		Serial.println(dataLogged);
+		dataReady = false;
+	}
+}
