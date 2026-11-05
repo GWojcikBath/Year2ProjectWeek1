@@ -27,7 +27,10 @@ maximumGap_ms = 400;
 % Zero crossing threshold
 zcThreshold = 5;
 
-filename = '04-11-26_NA_EMGSamples(Alex)2_V1.txt';
+
+[filename, location] = uigetfile({'*.txt;*.csv'});
+
+filename = fullfile(location, filename);
 
 fid = fopen(filename,'r');
 
